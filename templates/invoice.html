@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Invoice Verification{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">P2P Workflow / <span>Step 6</span></div>
+  <h1 class="page-title">Invoice Verification — 3-Way Match</h1>
+  <p class="page-subtitle">Automated PO + GR + Invoice matching before payment release</p>
+</div>
+
+{% if latest_po and latest_gr %}
+<div class="card">
+  <div class="card-title"><span class="step-tag">Step 6</span> Enter Vendor Invoice</div>
+
+  <!-- 3-way match info boxes -->
+  <div class="match-info-grid">
+    <div class="match-info-box">
+      <div class="match-info-label">📄 Purchase Order</div>
+      <div class="match-info-val">{{ latest_po.po_number }}</div>
+      <div class="match-info-sub">₹{{ "{:,.0f}".format(latest_po.total_value) }} | {{ latest_po.quantity }} units</div>
+    </div>
+    <div class="match-info-box">
+      <div class="match-info-label">📦 Goods Receipt</div>
+      <div class="match-info-val">{{ latest_gr.gr_number }}</div>
+      <div class="match-info-sub">{{ latest_gr.quantity_received }} units received</div>
+    </div>
+    <div class="match-info-box highlight">
+      <div class="match-info-label">🧾 Vendor Invoice</div>
+      <div class="match-info-val">Enter Below</div>
+      <div class="match-info-sub">Must match PO value</div>
+    </div>
+  </div>
+
+  <form method="POST" style="margin-top:16px">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Vendor Invoice Reference</label>
+        <input type="text" name="vendor_invoice_ref" value="INV-V001-APR-2026" required/>
+      </div>
+      <div class="form-group">
+        <label>Vendor</label>
+        <input type="text" value="{{ latest_po.vendor_name }}" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Invoice Amount (₹) * <small style="color:var(--muted)">(PO value: ₹{{ "{:,.0f}".format(latest_po.total_value) }})</small></label>
+        <input type="number" name="amount" value="{{ latest_po.total_value|int }}" step="0.01" required/>
+      </div>
+      <div class="form-group">
+        <label>Invoice Date</label>
+        <input type="date" name="invoice_date" value="{{ now().split(' ')[0] if now is defined else '' }}"/>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary" style="margin-top:16px">🔍 Run 3-Way Match</button>
+  </form>
+</div>
+{% else %}
+<div class="notif warning">⚠️ Complete PO and Goods Receipt steps first.</div>
+{% endif %}
+
+{% if invoices %}
+<div class="card">
+  <div class="card-title">🧾 Invoice Records</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Invoice #</th><th>Vendor Ref</th><th>PO Ref</th><th>Amount</th><th>PO Value</th><th>3-Way Match</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td class="mono">{{ inv.invoice_number }}</td>
+          <td>{{ inv.vendor_invoice_ref }}</td>
+          <td class="mono">{{ inv.po_number }}</td>
+          <td>₹{{ "{:,.0f}".format(inv.amount) }}</td>
+          <td>₹{{ "{:,.0f}".format(inv.po_value) }}</td>
+          <td>
+            <span class="badge badge-{{ 'passed' if inv.match_status == 'Passed' else 'failed' }}">
+              {{ '✅ ' if inv.match_status == 'Passed' else '❌ ' }}{{ inv.match_status }}
+            </span>
+          </td>
+          <td><span class="badge badge-{{ 'approved' if inv.status == 'Approved' else ('paid' if inv.status == 'Paid' else 'pending') }}">{{ inv.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top:12px">
+  <a href="{{ url_for('payment') }}" class="btn btn-outline">→ Next: Vendor Payment</a>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+# Database
+novatrade.db
+*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# AI tools (never push these)
+.claude
+.mcp
+CLAUDE

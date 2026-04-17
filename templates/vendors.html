@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Vendor Master{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">Master Data / <span>Vendor Master</span></div>
+  <h1 class="page-title">Vendor Master Data</h1>
+  <p class="page-subtitle">Approved vendor list — NovaTrade Pvt. Ltd.</p>
+</div>
+
+<div class="card">
+  <div class="card-title">🏭 Registered Vendors</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Vendor Code</th><th>Vendor Name</th><th>City</th><th>Unit Price</th><th>Lead Time</th><th>Payment Terms</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for code, info in vendors.items() %}
+        <tr>
+          <td class="mono">{{ code }}</td>
+          <td>{{ info.name }}</td>
+          <td>{{ info.city }}</td>
+          <td>₹{{ prices[code].price }}/unit</td>
+          <td>{{ prices[code].lead }} days</td>
+          <td>{{ prices[code].terms }}</td>
+          <td><span class="badge badge-approved">Active</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">📦 Material Master</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Material Code</th><th>Description</th><th>Type</th><th>Unit</th><th>Plant</th><th>Storage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="mono">RM-STEEL-001</td>
+          <td>Steel Rods 12mm TMT</td>
+          <td>ROH — Raw Material</td>
+          <td>EA</td>
+          <td>NO01</td>
+          <td>SL01</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

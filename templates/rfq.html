@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}RFQ Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">P2P Workflow / <span>Step 2</span></div>
+  <h1 class="page-title">Request for Quotation (RFQ)</h1>
+  <p class="page-subtitle">SAP Integration Suite — Automated RFQ dispatch to approved vendors</p>
+</div>
+
+{% if approved_pr %}
+<div class="notif success">
+  ✅ Approved PR found: <strong>{{ approved_pr.pr_number }}</strong> — {{ approved_pr.material_code }}, Qty: {{ approved_pr.quantity }}
+</div>
+
+<div class="card">
+  <div class="card-title"><span class="step-tag">Step 2</span> Create & Dispatch RFQ</div>
+  <form method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Reference PR</label>
+        <input type="text" value="{{ approved_pr.pr_number }}" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Material</label>
+        <input type="text" value="{{ approved_pr.material_code }}" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="text" value="{{ approved_pr.quantity }} EA" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Quotation Deadline *</label>
+        <input type="date" name="deadline" value="{{ today }}" required/>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:8px">SELECT VENDORS</label>
+      {% for code, info in vendors.items() %}
+      <label class="vendor-checkbox">
+        <input type="checkbox" name="vendors" value="{{ code }}" checked/>
+        <strong>{{ code }}</strong> — {{ info.name }} ({{ info.city }})
+      </label>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary" style="margin-top:16px">📨 Dispatch RFQ to Vendors</button>
+  </form>
+</div>
+{% else %}
+<div class="notif warning">⚠️ No approved PR found. Go to <a href="{{ url_for('purchase_requisition') }}">Purchase Requisition</a> and approve one first.</div>
+{% endif %}
+
+{% if rfqs %}
+<div class="card">
+  <div class="card-title">📬 Dispatched RFQs</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>RFQ #</th><th>PR Ref</th><th>Material</th><th>Qty</th><th>Vendors</th><th>Deadline</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in rfqs %}
+        <tr>
+          <td class="mono">{{ r.rfq_number }}</td>
+          <td class="mono">{{ r.pr_number }}</td>
+          <td>{{ r.material_code }}</td>
+          <td>{{ r.quantity }}</td>
+          <td>{{ r.vendors }}</td>
+          <td>{{ r.deadline }}</td>
+          <td><span class="badge badge-open">{{ r.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top:12px">
+  <a href="{{ url_for('compare') }}" class="btn btn-outline">→ Next: Price Comparison</a>
+</div>
+{% endblock %}

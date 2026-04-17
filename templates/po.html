@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Purchase Order{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">P2P Workflow / <span>Step 4</span></div>
+  <h1 class="page-title">Purchase Order (PO)</h1>
+  <p class="page-subtitle">SAP Build Process Automation — Legally binding PO creation and release</p>
+</div>
+
+{% if selected_quote and pr %}
+<div class="card">
+  <div class="card-title"><span class="step-tag">Step 4</span> Create Purchase Order</div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Vendor</label>
+      <input type="text" value="{{ selected_quote.vendor_code }} — {{ selected_quote.vendor_name }}" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Material</label>
+      <input type="text" value="{{ pr.material_code }} — {{ pr.material_desc }}" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Quantity</label>
+      <input type="text" value="{{ pr.quantity }} EA" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Unit Price</label>
+      <input type="text" value="₹{{ '{:,.0f}'.format(selected_quote.unit_price) }}" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Total Value</label>
+      <input type="text" value="₹{{ '{:,.0f}'.format(selected_quote.unit_price * pr.quantity) }}" readonly style="font-weight:700;color:var(--sap-blue)"/>
+    </div>
+    <div class="form-group">
+      <label>Plant / Storage</label>
+      <input type="text" value="{{ pr.plant }} / SL01" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Payment Terms</label>
+      <input type="text" value="{{ selected_quote.payment_terms }}" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Company Code</label>
+      <input type="text" value="NOVT — NovaTrade Pvt. Ltd." readonly/>
+    </div>
+  </div>
+
+  <form method="POST" style="margin-top:16px">
+    <button type="submit" class="btn btn-primary">🚀 Release Purchase Order</button>
+  </form>
+</div>
+{% else %}
+<div class="notif warning">⚠️ Complete Price Comparison and select a vendor first.</div>
+{% endif %}
+
+{% if pos %}
+<div class="card">
+  <div class="card-title">🛒 All Purchase Orders</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>PO #</th><th>Vendor</th><th>Material</th><th>Qty</th><th>Total Value</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for po in pos %}
+        <tr>
+          <td class="mono">{{ po.po_number }}</td>
+          <td>{{ po.vendor_code }}</td>
+          <td>{{ po.material_code }}</td>
+          <td>{{ po.quantity }}</td>
+          <td style="font-weight:700;color:var(--sap-blue)">₹{{ "{:,.0f}".format(po.total_value) }}</td>
+          <td><span class="badge badge-open">{{ po.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top:12px">
+  <a href="{{ url_for('goods_receipt') }}" class="btn btn-outline">→ Next: Goods Receipt</a>
+</div>
+{% endblock %}

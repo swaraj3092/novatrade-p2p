@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NovaTrade P2P — {% block title %}{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="sap-logo">SAP</span>
+    <span class="topbar-title">NovaTrade Pvt. Ltd.</span>
+    <span class="topbar-sub">| Procure-to-Pay | SAP BTP</span>
+  </div>
+  <div class="topbar-right">
+    <span>📍 Singapore – Azure</span>
+    <span>|</span>
+    <span>Roll: 23053092</span>
+    <div class="user-badge">SB</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+        <span>🏠</span> Dashboard
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">P2P Workflow</div>
+      <a href="{{ url_for('purchase_requisition') }}" class="nav-item {% if request.endpoint == 'purchase_requisition' %}active{% endif %}">
+        <span>📋</span> 1. Purchase Requisition
+      </a>
+      <a href="{{ url_for('rfq') }}" class="nav-item {% if request.endpoint == 'rfq' %}active{% endif %}">
+        <span>📨</span> 2. RFQ Management
+      </a>
+      <a href="{{ url_for('compare') }}" class="nav-item {% if request.endpoint == 'compare' %}active{% endif %}">
+        <span>⚖️</span> 3. Price Comparison
+      </a>
+      <a href="{{ url_for('purchase_order') }}" class="nav-item {% if request.endpoint == 'purchase_order' %}active{% endif %}">
+        <span>🛒</span> 4. Purchase Order
+      </a>
+      <a href="{{ url_for('goods_receipt') }}" class="nav-item {% if request.endpoint == 'goods_receipt' %}active{% endif %}">
+        <span>📦</span> 5. Goods Receipt
+      </a>
+      <a href="{{ url_for('invoice') }}" class="nav-item {% if request.endpoint == 'invoice' %}active{% endif %}">
+        <span>🧾</span> 6. Invoice Verification
+      </a>
+      <a href="{{ url_for('payment') }}" class="nav-item {% if request.endpoint == 'payment' %}active{% endif %}">
+        <span>💳</span> 7. Vendor Payment
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Master Data</div>
+      <a href="{{ url_for('vendors') }}" class="nav-item {% if request.endpoint == 'vendors' %}active{% endif %}">
+        <span>🏭</span> Vendor Master
+      </a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

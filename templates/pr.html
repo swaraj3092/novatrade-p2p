@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Purchase Requisition{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">P2P Workflow / <span>Step 1</span></div>
+  <h1 class="page-title">Purchase Requisition (PR)</h1>
+  <p class="page-subtitle">SAP Build Process Automation — Internal purchase request with automated approval</p>
+</div>
+
+<div class="card">
+  <div class="card-title"><span class="step-tag">Step 1</span> Create New Purchase Requisition</div>
+  <form method="POST">
+    <input type="hidden" name="action" value="submit"/>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Material Code *</label>
+        <input type="text" name="material_code" value="RM-STEEL-001" required/>
+      </div>
+      <div class="form-group">
+        <label>Material Description</label>
+        <input type="text" name="material_desc" value="Steel Rods 12mm TMT"/>
+      </div>
+      <div class="form-group">
+        <label>Quantity *</label>
+        <input type="number" name="quantity" value="500" min="1" required/>
+      </div>
+      <div class="form-group">
+        <label>Department</label>
+        <select name="department">
+          <option>Stores &amp; Warehouse</option>
+          <option>Production</option>
+          <option>Maintenance</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Plant</label>
+        <input type="text" name="plant" value="NO01 — Bhubaneswar Plant" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Required Delivery Date *</label>
+        <input type="date" name="required_date" value="{{ today }}" required/>
+      </div>
+      <div class="form-group full">
+        <label>Justification</label>
+        <input type="text" name="justification" value="Low inventory — reorder point reached. Current stock: 45 units."/>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary" style="margin-top:16px">📋 Submit for Approval</button>
+  </form>
+</div>
+
+<!-- LIST OF PRs -->
+{% if prs %}
+<div class="card">
+  <div class="card-title">📄 All Purchase Requisitions</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>PR #</th><th>Material</th><th>Qty</th><th>Department</th><th>Required Date</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for pr in prs %}
+        <tr>
+          <td class="mono">{{ pr.pr_number }}</td>
+          <td>{{ pr.material_code }}</td>
+          <td>{{ pr.quantity }}</td>
+          <td>{{ pr.department }}</td>
+          <td>{{ pr.required_date }}</td>
+          <td><span class="badge badge-{{ 'approved' if pr.status == 'Approved' else 'pending' }}">{{ pr.status }}</span></td>
+          <td>
+            {% if pr.status == 'Pending' %}
+            <form method="POST" style="display:inline">
+              <input type="hidden" name="action" value="approve"/>
+              <input type="hidden" name="pr_id" value="{{ pr.id }}"/>
+              <button type="submit" class="btn btn-success btn-sm">✅ Approve</button>
+            </form>
+            {% else %}
+            <span style="color:var(--sap-green);font-size:12px">✓ Done</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top:12px">
+  <a href="{{ url_for('rfq') }}" class="btn btn-outline">→ Next: RFQ Management</a>
+</div>
+{% endblock %}

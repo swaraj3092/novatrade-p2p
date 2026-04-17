@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">BTP Cockpit / <span>NOVT-PROC</span> / Procurement</div>
+  <h1 class="page-title">Procurement Dashboard</h1>
+  <p class="page-subtitle">NovaTrade Pvt. Ltd. — Procure-to-Pay Overview | FY 2026–27</p>
+</div>
+
+<!-- STATS -->
+<div class="stats-grid">
+  <div class="stat-card blue">
+    <div class="stat-num">{{ stats.pr_count }}</div>
+    <div class="stat-label">Purchase Requisitions</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-num">{{ stats.po_count }}</div>
+    <div class="stat-label">Purchase Orders</div>
+  </div>
+  <div class="stat-card gold">
+    <div class="stat-num">{{ stats.inv_count }}</div>
+    <div class="stat-label">Invoices</div>
+  </div>
+  <div class="stat-card accent">
+    <div class="stat-num">₹{{ "{:,.0f}".format(stats.pay_total) }}</div>
+    <div class="stat-label">Payments Processed</div>
+  </div>
+</div>
+
+<!-- PROCESS FLOW -->
+<div class="card">
+  <div class="card-title">📊 P2P Process Flow — Current Status</div>
+  <div class="flow">
+    {% set flow_steps = [
+      ('pr',      '📋', 'Purchase Requisition'),
+      ('rfq',     '📨', 'RFQ'),
+      ('compare', '⚖️', 'Price Comparison'),
+      ('po',      '🛒', 'Purchase Order'),
+      ('gr',      '📦', 'Goods Receipt'),
+      ('invoice', '🧾', 'Invoice'),
+      ('payment', '💳', 'Payment'),
+    ] %}
+    {% for key, icon, label in flow_steps %}
+      <div class="flow-step">
+        <div class="flow-circle {{ 'done' if steps_done[key] else 'pending' }}">{{ icon }}</div>
+        <div class="flow-label">{{ label }}</div>
+      </div>
+      {% if not loop.last %}<div class="flow-arrow {{ 'done' if steps_done[key] else '' }}"></div>{% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+<!-- RECENT RECORDS -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <div class="card-title">📋 Recent Purchase Requisitions</div>
+    {% if recent_pr %}
+    <table>
+      <thead><tr><th>PR #</th><th>Material</th><th>Qty</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for pr in recent_pr %}
+        <tr>
+          <td class="mono">{{ pr.pr_number }}</td>
+          <td>{{ pr.material_code }}</td>
+          <td>{{ pr.quantity }}</td>
+          <td><span class="badge badge-{{ 'approved' if pr.status == 'Approved' else 'pending' }}">{{ pr.status }}</span></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="muted-text">No requisitions yet. <a href="{{ url_for('purchase_requisition') }}">Create one →</a></p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-title">🛒 Recent Purchase Orders</div>
+    {% if recent_po %}
+    <table>
+      <thead><tr><th>PO #</th><th>Vendor</th><th>Value</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for po in recent_po %}
+        <tr>
+          <td class="mono">{{ po.po_number }}</td>
+          <td>{{ po.vendor_code }}</td>
+          <td>₹{{ "{:,.0f}".format(po.total_value) }}</td>
+          <td><span class="badge badge-open">{{ po.status }}</span></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="muted-text">No orders yet. <a href="{{ url_for('purchase_order') }}">Create one →</a></p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

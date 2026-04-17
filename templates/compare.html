@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Price Comparison{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">P2P Workflow / <span>Step 3</span></div>
+  <h1 class="page-title">Quotation Price Comparison</h1>
+  <p class="page-subtitle">SAP HANA Cloud — Auto-generated vendor comparison report</p>
+</div>
+
+{% if quotes %}
+<div class="card">
+  <div class="card-title"><span class="step-tag">Step 3</span> Vendor Price Analysis — {{ latest_rfq.rfq_number }}</div>
+
+  <!-- VENDOR CARDS -->
+  <div class="vendor-cards">
+    {% for q in quotes %}
+    <div class="vendor-card {% if loop.first %}best{% endif %} {% if q.status == 'Rejected' %}rejected{% endif %} {% if q.status == 'Selected' %}selected{% endif %}">
+      {% if loop.first and q.status != 'Rejected' %}
+      <div class="vendor-best-tag">⭐ RECOMMENDED</div>
+      {% endif %}
+      <div class="vendor-name">{{ q.vendor_code }} — {{ q.vendor_name }}</div>
+      <div class="vendor-price">₹{{ "{:,.0f}".format(q.unit_price) }}<span>/unit</span></div>
+      <div class="vendor-meta">⏱ {{ q.lead_time }} days &nbsp;|&nbsp; 💳 {{ q.payment_terms }}</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--muted)">Total: ₹{{ "{:,.0f}".format(q.total_value) }}</div>
+      {% if q.status == 'Selected' %}
+      <div style="margin-top:8px"><span class="badge badge-approved">✓ Selected</span></div>
+      {% elif q.status == 'Rejected' %}
+      <div style="margin-top:8px"><span class="badge badge-failed">Rejected</span></div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="table-wrap" style="margin-top:16px">
+    <table>
+      <thead>
+        <tr><th>Criteria</th>
+        {% for q in quotes %}<th>{{ q.vendor_code }} {% if loop.first %}⭐{% endif %}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Unit Price</td>
+          {% for q in quotes %}
+          <td {% if loop.first %}style="color:var(--sap-green);font-weight:700"{% endif %}>₹{{ "{:,.0f}".format(q.unit_price) }}</td>
+          {% endfor %}
+        </tr>
+        <tr><td>Total Value</td>
+          {% for q in quotes %}
+          <td {% if loop.first %}style="color:var(--sap-green);font-weight:700"{% endif %}>₹{{ "{:,.0f}".format(q.total_value) }}</td>
+          {% endfor %}
+        </tr>
+        <tr><td>Lead Time</td>
+          {% for q in quotes %}<td>{{ q.lead_time }} days</td>{% endfor %}
+        </tr>
+        <tr><td>Payment Terms</td>
+          {% for q in quotes %}<td>{{ q.payment_terms }}</td>{% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SELECT VENDOR FORM -->
+  {% set already_selected = quotes | selectattr('status', 'equalto', 'Selected') | list %}
+  {% if not already_selected %}
+  <form method="POST" style="margin-top:16px">
+    <input type="hidden" name="rfq_number" value="{{ latest_rfq.rfq_number }}"/>
+    <label style="font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:8px">SELECT WINNING VENDOR</label>
+    <select name="selected_vendor" class="select-inline">
+      {% for q in quotes %}
+      <option value="{{ q.vendor_code }}">{{ q.vendor_code }} — {{ q.vendor_name }} (₹{{ q.unit_price }}/unit)</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-success" style="margin-left:10px">✅ Confirm Selection</button>
+  </form>
+  {% else %}
+  <div class="notif success" style="margin-top:16px">✅ {{ already_selected[0].vendor_code }} selected. Rejection notifications sent to others.</div>
+  {% endif %}
+</div>
+{% else %}
+<div class="notif warning">⚠️ No quotations found. <a href="{{ url_for('rfq') }}">Dispatch an RFQ first.</a></div>
+{% endif %}
+
+<div style="margin-top:12px">
+  <a href="{{ url_for('purchase_order') }}" class="btn btn-outline">→ Next: Purchase Order</a>
+</div>
+{% endblock %}

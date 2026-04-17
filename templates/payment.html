@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Vendor Payment{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">P2P Workflow / <span>Step 7</span></div>
+  <h1 class="page-title">Vendor Payment Processing</h1>
+  <p class="page-subtitle">SAP Integration Suite — Automated payment run and remittance advice</p>
+</div>
+
+{% if latest_inv %}
+<div class="card">
+  <div class="card-title"><span class="step-tag">Step 7</span> Process Payment</div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Invoice Reference</label>
+      <input type="text" value="{{ latest_inv.invoice_number }} — {{ latest_inv.vendor_invoice_ref }}" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Vendor</label>
+      <input type="text" value="{{ latest_inv.vendor_code }} — {{ latest_inv.vendor_name }}" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Payment Amount</label>
+      <input type="text" value="₹{{ '{:,.0f}'.format(latest_inv.amount) }}" readonly style="font-weight:700;color:var(--sap-blue)"/>
+    </div>
+    <div class="form-group">
+      <label>3-Way Match Status</label>
+      <input type="text" value="✅ PASSED — Cleared for Payment" readonly style="color:var(--sap-green);font-weight:600"/>
+    </div>
+    <div class="form-group">
+      <label>Vendor Bank</label>
+      <input type="text" value="State Bank of India — SBIN0012345" readonly/>
+    </div>
+    <div class="form-group">
+      <label>Company Code</label>
+      <input type="text" value="NOVT — NovaTrade Pvt. Ltd." readonly/>
+    </div>
+  </div>
+
+  <form method="POST" style="margin-top:16px">
+    <div class="form-group" style="max-width:300px">
+      <label>Payment Method</label>
+      <select name="payment_method">
+        <option>NEFT — National Electronic Fund Transfer</option>
+        <option>RTGS — Real Time Gross Settlement</option>
+        <option>Cheque</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-success" style="margin-top:14px">
+      💳 Process Payment — ₹{{ "{:,.0f}".format(latest_inv.amount) }}
+    </button>
+  </form>
+</div>
+{% else %}
+<div class="notif warning">⚠️ No approved invoice found. Complete Invoice Verification with a passing 3-Way Match first.</div>
+{% endif %}
+
+{% if payments %}
+<div class="card">
+  <div class="card-title">💳 Payment History</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Payment #</th><th>Invoice Ref</th><th>Vendor</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td class="mono">{{ p.payment_number }}</td>
+          <td class="mono">{{ p.invoice_number }}</td>
+          <td>{{ p.vendor_name }}</td>
+          <td style="font-weight:700;color:var(--sap-green)">₹{{ "{:,.0f}".format(p.amount) }}</td>
+          <td>{{ p.payment_method }}</td>
+          <td>{{ p.payment_date }}</td>
+          <td><span class="badge badge-paid">✅ {{ p.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top:12px">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-outline">🏠 Back to Dashboard</a>
+</div>
+{% endblock %}

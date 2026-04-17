@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Goods Receipt{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="breadcrumb">P2P Workflow / <span>Step 5</span></div>
+  <h1 class="page-title">Goods Receipt (GR)</h1>
+  <p class="page-subtitle">Movement Type 101 — Physical goods verification and stock update</p>
+</div>
+
+{% if latest_po %}
+<div class="card">
+  <div class="card-title"><span class="step-tag">Step 5</span> Post Goods Receipt</div>
+  <form method="POST">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Reference PO</label>
+        <input type="text" value="{{ latest_po.po_number }}" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Movement Type</label>
+        <input type="text" value="101 — GR against Purchase Order" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Vendor</label>
+        <input type="text" value="{{ latest_po.vendor_code }} — {{ latest_po.vendor_name }}" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Material</label>
+        <input type="text" value="{{ latest_po.material_code }}" readonly/>
+      </div>
+      <div class="form-group">
+        <label>PO Quantity</label>
+        <input type="text" value="{{ latest_po.quantity }} EA" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Quantity Received *</label>
+        <input type="number" name="quantity_received" value="{{ latest_po.quantity }}" min="1" max="{{ latest_po.quantity }}" required/>
+      </div>
+      <div class="form-group">
+        <label>Plant</label>
+        <input type="text" value="{{ latest_po.plant }}" readonly/>
+      </div>
+      <div class="form-group">
+        <label>Storage Location</label>
+        <input type="text" value="{{ latest_po.storage_location }}" readonly/>
+      </div>
+      <div class="form-group full">
+        <label>Quality Check Result</label>
+        <select name="quality_status">
+          <option value="Passed">✅ Passed — All units accepted</option>
+          <option value="Partial">⚠️ Partial — Some units rejected</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary" style="margin-top:16px">📦 Post Goods Receipt</button>
+  </form>
+</div>
+{% else %}
+<div class="notif warning">⚠️ No Purchase Order found. Complete the PO step first.</div>
+{% endif %}
+
+{% if grs %}
+<div class="card">
+  <div class="card-title">📦 All Goods Receipts</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>GR #</th><th>PO Ref</th><th>Material</th><th>Qty Received</th><th>Storage</th><th>Quality</th><th>Posted At</th></tr></thead>
+      <tbody>
+        {% for gr in grs %}
+        <tr>
+          <td class="mono">{{ gr.gr_number }}</td>
+          <td class="mono">{{ gr.po_number }}</td>
+          <td>{{ gr.material_code }}</td>
+          <td>{{ gr.quantity_received }} EA</td>
+          <td>{{ gr.storage_location }}</td>
+          <td><span class="badge badge-{{ 'approved' if gr.quality_status == 'Passed' else 'pending' }}">{{ gr.quality_status }}</span></td>
+          <td style="font-size:12px">{{ gr.posted_at }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div style="margin-top:12px">
+  <a href="{{ url_for('invoice') }}" class="btn btn-outline">→ Next: Invoice Verification</a>
+</div>
+{% endblock %}
